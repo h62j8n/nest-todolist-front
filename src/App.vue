@@ -7,12 +7,19 @@
 </template>
 
 <style lang="scss">
+html {
+  font-size: 14px;
+}
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+  padding: 3rem;
+  font-family: "Noto Sans KR", sans-serif;
+  .card-header {
+    padding-top: 1rem;
+    padding-bottom: 0;
+    background-color: transparent;
+    // font-weight: 500;
+    border: none;
+  }
 }
 
 nav {

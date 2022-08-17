@@ -11,5 +11,5 @@ import "typeface-notosans-kor";
 createApp(App)
   .use(store)
   .use(router)
-  .component("fa-fa", FontAwesomeIcon)
+  .component("font-awesome-icon", FontAwesomeIcon)
   .mount("#app");
