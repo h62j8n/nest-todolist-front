@@ -1,51 +1,53 @@
-<script lang="ts">
-import { defineComponent } from "vue";
+<script setup lang="ts">
+import { onMounted, ref } from "vue";
+import { ResponseStatus } from "@/types/ResponseEntity";
+import { Todo } from "@/types/Todo";
+import TodoService from "@/services/todo.service";
 import ProfileComp from "@/components/ProfileComp.vue";
 import draggable from "vuedraggable";
 
-export default defineComponent({
-  name: "TodoList",
-  components: {
-    ProfileComp,
-    draggable,
-  },
-  data() {
-    return {
-      todo: [
-        { name: "John", id: 1 },
-        { name: "Joao", id: 2 },
-        { name: "Jean", id: 3 },
-        { name: "Gerard", id: 4 },
-      ],
-      working: [
-        { name: "Juan", id: 5 },
-        { name: "Edgard", id: 6 },
-        { name: "Johnson", id: 7 },
-      ],
-      done: [
-        { name: "item1", id: 8 },
-        { name: "item2", id: 9 },
-        { name: "item3", id: 10 },
-      ],
-    };
-  },
-  methods: {
-    // add: function () {
-    //   this.list.push({ name: "Juan" });
-    // },
-    // replace: function () {
-    //   this.list = [{ name: "Edgard" }];
-    // },
-    // clone: function (el) {
-    //   return {
-    //     name: el.name + " cloned",
-    //   };
-    // },
-    // log: function (evt) {
-    //   window.console.log(evt);
-    // },
-  },
+const notDone = ref<Todo[]>([]);
+const doing = ref<Todo[]>([]);
+const done = ref<Todo[]>([]);
+
+onMounted(() => {
+  getAllTodosGroupByStatus();
 });
+
+// 모든 Todo 조회
+const getAllTodosGroupByStatus = async () => {
+  try {
+    const response = await TodoService.getAllTodosGroupByStatus();
+    if (response.data._statusCode === ResponseStatus.OK) {
+      if (response.data._data === null) return null;
+      notDone.value = response.data._data.notDone; // ref객체의 불변성: 재할당은 되지만 값을 변경하는건 안됨
+      doing.value = response.data._data.doing;
+      done.value = response.data._data.done;
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+function getAllTodosGroupByStatus2() {
+  TodoService.getAllTodosGroupByStatus()
+    .then((response) => {
+      if (response.data._statusCode === ResponseStatus.OK) {
+        if (response.data._data === null) return null;
+        notDone.value = response.data._data.notDone;
+        doing.value = response.data._data.doing;
+        done.value = response.data._data.done;
+      }
+    })
+    .catch((e) => {
+      console.log(e);
+    });
+}
+
+// draggable
+const log = (e) => {
+  console.log(e);
+};
 </script>
 
 <template>
@@ -70,14 +72,14 @@ export default defineComponent({
                 <div class="card-header text-white h4 pb-3">To Do</div>
                 <div class="card-body">
                   <draggable
-                    :list="todo"
+                    :list="notDone"
                     group="people"
                     @change="log"
                     itemKey="id"
                   >
-                    <template #item="{ element, index }">
+                    <template #item="{ element }">
                       <div class="task-box bg-white mb-3 p-3">
-                        {{ element.name }} {{ index }}
+                        {{ element.content }}
                       </div>
                     </template>
                   </draggable>
@@ -89,14 +91,14 @@ export default defineComponent({
                 <div class="card-header text-white h4 pb-3">Working</div>
                 <div class="card-body">
                   <draggable
-                    :list="working"
+                    :list="doing"
                     group="people"
                     @change="log"
                     itemKey="id"
                   >
-                    <template #item="{ element, index }">
+                    <template #item="{ element }">
                       <div class="task-box bg-white mb-3 p-3">
-                        {{ element.name }} {{ index }}
+                        {{ element.content }}
                       </div>
                     </template>
                   </draggable>
@@ -107,15 +109,10 @@ export default defineComponent({
               <div class="kanban-card card bg-success">
                 <div class="card-header text-white h4 pb-3">Done</div>
                 <div class="card-body">
-                  <draggable
-                    :list="done"
-                    group="people"
-                    @change="log"
-                    itemKey="id"
-                  >
-                    <template #item="{ element, index }">
+                  <draggable :list="done" group="people" itemKey="id">
+                    <template #item="{ element }">
                       <div class="task-box bg-white mb-3 p-3">
-                        {{ element.name }} {{ index }}
+                        {{ element.content }}
                       </div>
                     </template>
                   </draggable>
